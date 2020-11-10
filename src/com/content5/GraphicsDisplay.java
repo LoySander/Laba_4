@@ -16,6 +16,8 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import javax.swing.JPanel;
+import java.awt.geom.*;
+
 @SuppressWarnings("serial")
 public class GraphicsDisplay extends JPanel {
     // Список координат точек для построения графика
@@ -43,11 +45,11 @@ public class GraphicsDisplay extends JPanel {
         setBackground(Color.WHITE);
         // Сконструировать необходимые объекты, используемые в рисовании
         // Перо для рисования графика
-        graphicsStroke= new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 10.0f, null, 0.0f);
+        graphicsStroke= new BasicStroke(3.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 10.0f, new float[] {4,1,1,1,1,1,2,1,2}, 0.0f);
         // Перо для рисования осей координат
         axisStroke= new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, null, 0.0f);
         // Перо для рисования контуров маркеров
-        markerStroke= new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, null, 0.0f);
+        markerStroke= new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, null, 0.0f);
         // Шрифт для подписей осей координат
         axisFont= new Font("Serif", Font.BOLD, 36);
     }
@@ -176,25 +178,42 @@ public class GraphicsDisplay extends JPanel {
         }
     }
     protected void paintMarkers(Graphics2D canvas){
-        // Шаг 1 -Установить специальное перо для черчения контуров маркеров
-        canvas.setStroke(markerStroke);
-        // Выбрать красный цвета для контуров маркеров
-        canvas.setColor(Color.RED);
-        // Выбрать красный цвет для закрашивания маркеров внутри
-        canvas.setPaint(Color.RED);
-        // Шаг 2 -Организовать цикл по всем точкам графика
+
+
+
         for(Double[] point: graphicsData){
-            // Инициализировать эллипс как объект для представления маркера
-            Ellipse2D.Double marker = new Ellipse2D.Double();
-            /* Эллипс будет задаваться посредством указания координат его центра и угла прямоугольника, в который он вписан */
+            boolean flag = true;
+            double temp = point[1];
+            double first = temp % 10;
+            temp /= 10;
+            while (Math.abs(temp) > 0) {
+                double second = temp % 10;
+                temp /= 10;
+                if (first < second) {
+                    flag = false;
+                    break;
+                }
+
+            }
+            if (!flag) {
+                canvas.setColor(Color.RED);
+                canvas.setPaint(Color.RED);
+            }
+            else {
+                canvas.setColor(Color.BLUE);
+                canvas.setPaint(Color.BLUE);
+            }
+            canvas.setStroke(markerStroke);
+          GeneralPath path = new GeneralPath();
             // Центр -в точке (x,y)
             Point2D.Double center = xyToPoint(point[0], point[1]);
             // Угол прямоугольника -отстоит на расстоянии (3,3)
+            canvas.draw(new Line2D.Double(shiftPoint(center, -11, 0), shiftPoint(center, 11, 0)));
+            canvas.draw(new Line2D.Double(shiftPoint(center, 0, 11), shiftPoint(center, 0, -11)));
+            canvas.draw(new Line2D.Double(shiftPoint(center, 11, 11), shiftPoint(center, -11, -11)));
+            canvas.draw(new Line2D.Double(shiftPoint(center, -11, 11), shiftPoint(center, 11, -11)));
             Point2D.Double corner = shiftPoint(center, 3, 3);
-            // Задать эллипс по центру и диагонали
-            marker.setFrameFromCenter(center, corner);
-            canvas.draw(marker);// Начертить контур маркера
-            canvas.fill(marker);// Залить внутреннюю область маркера
+
         }
     }
     public void paintComponent(Graphics g){
@@ -210,6 +229,7 @@ public class GraphicsDisplay extends JPanel {
         // Шаг 3 -Определить начальные границы области отображения
         // Еѐ верхний левый угол -(minX, maxY), правый нижний -(maxX, minY)
         minX= graphicsData[0][0];
+        
         maxX= graphicsData[graphicsData.length-1][0];
         minY= graphicsData[0][1];
         maxY= minY;

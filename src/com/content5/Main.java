@@ -31,7 +31,7 @@ public class Main {
 
         for (i = 0;i < arguments.length;i++){
             out.writeDouble(arguments[i]);
-            double y = arguments[i]*2;
+            double y = arguments[i];
             out.writeDouble(y);
         }
         }
