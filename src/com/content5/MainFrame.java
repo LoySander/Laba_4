@@ -23,6 +23,7 @@ public class MainFrame extends JFrame {
     private JFileChooser fileChooser= null;
     private JCheckBoxMenuItem showAxisMenuItem;
     private JCheckBoxMenuItem showMarkersMenuItem;
+    private JCheckBoxMenuItem showGridMenuItem;
     private GraphicsDisplay display= new GraphicsDisplay();
     private boolean fileLoaded= false;
  public MainFrame(){
@@ -59,6 +60,7 @@ public class MainFrame extends JFrame {
      // Создать пункт меню "График"
      JMenu graphicsMenu = new JMenu("График");
      menuBar.add(graphicsMenu);
+
      // Создать действие для реакции на активацию элемента
      // "Показывать оси координат"
      Action showAxisAction = new AbstractAction("Показывать оси координат") {
@@ -85,6 +87,16 @@ public class MainFrame extends JFrame {
      graphicsMenu.add(showMarkersMenuItem);
      // Элемент по умолчанию выключен
      showMarkersMenuItem.setSelected(true);
+     Action  showGrid = new AbstractAction("Показать сетку") {
+         @Override
+         public void actionPerformed(ActionEvent e) {
+             display.setShowGrid(showGridMenuItem.isSelected());
+         }
+     };
+     showGridMenuItem = new JCheckBoxMenuItem(showGrid);
+     graphicsMenu.add(showGridMenuItem);
+     showGridMenuItem.setSelected(true);
+
      // Зарегистрировать обработчик событий, связанных с меню"График"
      graphicsMenu.addMenuListener(new GraphicsMenuListener());
      // Установить GraphicsDisplay в цент граничной компоновки
@@ -146,6 +158,7 @@ public class MainFrame extends JFrame {
             // Доступность или недоступность элементов меню "График" определяется загруженностью данных
             showAxisMenuItem.setEnabled(fileLoaded);
             showMarkersMenuItem.setEnabled(fileLoaded);
+            showGridMenuItem.setEnabled(fileLoaded);
         }
         // Обработчик, вызываемый после того, как меню исчезло с экрана
         public void menuDeselected(MenuEvent e) {}

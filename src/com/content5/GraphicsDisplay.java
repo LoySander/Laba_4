@@ -25,6 +25,7 @@ public class GraphicsDisplay extends JPanel {
     // Флаговые переменные, задающие правила отображения графика
     private boolean showAxis= true;
     private boolean showMarkers= true;
+    private boolean showGrid = true;
     // Границы диапазона пространства, подлежащего отображению
     private double minX;
     private double maxX;
@@ -36,6 +37,7 @@ public class GraphicsDisplay extends JPanel {
     private BasicStroke graphicsStroke;
     private BasicStroke axisStroke;
     private BasicStroke markerStroke;
+    private BasicStroke gridStroke;
     // Шрифт отображения подписей к осям координат
     private Font axisFont;
 
@@ -50,6 +52,7 @@ public class GraphicsDisplay extends JPanel {
         axisStroke= new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, null, 0.0f);
         // Перо для рисования контуров маркеров
         markerStroke= new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, null, 0.0f);
+        gridStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 10.0f, null, 0.0f);
         // Шрифт для подписей осей координат
         axisFont= new Font("Serif", Font.BOLD, 36);
     }
@@ -69,6 +72,10 @@ public class GraphicsDisplay extends JPanel {
     }
     public void setShowMarkers(boolean showMarkers) {
         this.showMarkers= showMarkers;
+        repaint();
+    }
+    public void setShowGrid(boolean showGrid){
+        this.showGrid = showGrid;
         repaint();
     }
     protected Point2D.Double xyToPoint(double x, double y){
@@ -110,6 +117,23 @@ public class GraphicsDisplay extends JPanel {
         // Отобразить график
         canvas.draw(graphics);
     }
+    protected void paintGrid(Graphics2D canvas){
+        canvas.setStroke(gridStroke);
+        canvas.setColor(Color.GRAY);
+        GeneralPath path = new GeneralPath();
+        double shagX = getSize().getWidth()/10;
+        double shagY = getSize().getHeight()/10;
+        for(int i = 0;i < 10;i++) {
+
+            canvas.drawLine(0, (int)(i*shagY), (int)getSize().getWidth(), (int)(i*shagY)); // Горизонтали
+            canvas.drawLine((int)(i*shagX), 0,(int)(i*shagX),(int)getSize().getHeight() ); // Вертикали
+
+        }
+
+
+
+    }
+
     protected void paintAxis(Graphics2D canvas) {
         // Шаг 1 –установить необходимые настройки рисования
         // Установить особое начертание для осей
@@ -183,13 +207,13 @@ public class GraphicsDisplay extends JPanel {
 
         for(Double[] point: graphicsData){
             boolean flag = true;
-            double temp = point[1];
-            double first = temp % 10;
-            temp /= 10;
-            while (Math.abs(temp) > 0) {
-                double second = temp % 10;
-                temp /= 10;
-                if (first < second) {
+            Double temp = Math.abs(point[1]); // Класс Double
+           String str = temp.toString();
+            str.replace(".","");
+            str.replace(",","");
+           int i = 1;
+            while (i < str.length()) { // formatter
+                if (str.charAt(i) < str.charAt(i-1)) {
                     flag = false;
                     break;
                 }
@@ -229,7 +253,7 @@ public class GraphicsDisplay extends JPanel {
         // Шаг 3 -Определить начальные границы области отображения
         // Еѐ верхний левый угол -(minX, maxY), правый нижний -(maxX, minY)
         minX= graphicsData[0][0];
-        
+
         maxX= graphicsData[graphicsData.length-1][0];
         minY= graphicsData[0][1];
         maxY= minY;
@@ -275,15 +299,20 @@ public class GraphicsDisplay extends JPanel {
         // затираться последующим
         // Первым (если нужно) отрисовываются оси координат.
         if(showAxis) paintAxis(canvas);
+        if(showGrid) paintGrid(canvas);
         // Затем отображаетсясам график
         paintGraphics(canvas);
         // Затем (если нужно) отображаются маркеры точек графика.
         if(showMarkers) paintMarkers(canvas);
+
+
         // Шаг 9 -Восстановить старые настройки холста
         canvas.setFont(oldFont);
         canvas.setPaint(oldPaint);
         canvas.setColor(oldColor);
         canvas.setStroke(oldStroke);
+
+
     }
 
 }
