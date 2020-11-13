@@ -47,7 +47,7 @@ public class GraphicsDisplay extends JPanel {
         setBackground(Color.WHITE);
         // Сконструировать необходимые объекты, используемые в рисовании
         // Перо для рисования графика
-        graphicsStroke= new BasicStroke(3.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 10.0f, new float[] {4,1,1,1,1,1,2,1,2}, 0.0f);
+        graphicsStroke= new BasicStroke(3.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 10.0f, new float[] {4,4}, 0.0f);
         // Перо для рисования осей координат
         axisStroke= new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, null, 0.0f);
         // Перо для рисования контуров маркеров
@@ -121,8 +121,9 @@ public class GraphicsDisplay extends JPanel {
         canvas.setStroke(gridStroke);
         canvas.setColor(Color.GRAY);
         GeneralPath path = new GeneralPath();
-        double shagX = getSize().getWidth()/10;
-        double shagY = getSize().getHeight()/10;
+       double shagX = getSize().getWidth()/10;
+       double shagY = getSize().getHeight()/10;
+
         for(int i = 0;i < 10;i++) {
 
             canvas.drawLine(0, (int)(i*shagY), (int)getSize().getWidth(), (int)(i*shagY)); // Горизонтали
@@ -148,6 +149,9 @@ public class GraphicsDisplay extends JPanel {
         // характеристик устройства (экрана)
         FontRenderContext context= canvas.getFontRenderContext();
         // Шаг 2 -Определить, должна ли быть видна ось Y на графике
+
+
+
         if(minX<=0.0 && maxX>=0.0){
             // Она видна, если левая граница показываемой области minX<=0.0,
             // а правая (maxX) >= 0.0
@@ -199,7 +203,11 @@ public class GraphicsDisplay extends JPanel {
             // Вывести надпись в точке с вычисленными координатами
             canvas.drawString("x",(float)(labelPos.getX()-bounds.getWidth()-10), (float)(labelPos.getY() + bounds.getY()));
 
+
         }
+        Rectangle2D bounds = axisFont.getStringBounds("0", context);
+        Point2D.Double labelPos = xyToPoint(0,0);
+        canvas.drawString("0",(float)(labelPos.getX()-bounds.getX()),(float)(labelPos.getY()-bounds.getY()));
     }
     protected void paintMarkers(Graphics2D canvas){
 
@@ -207,6 +215,7 @@ public class GraphicsDisplay extends JPanel {
 
         for(Double[] point: graphicsData){
             boolean flag = true;
+            
             Double temp = Math.abs(point[1]); // Класс Double
            String str = temp.toString();
             str.replace(".","");
@@ -236,14 +245,14 @@ public class GraphicsDisplay extends JPanel {
             canvas.draw(new Line2D.Double(shiftPoint(center, 0, 11), shiftPoint(center, 0, -11)));
             canvas.draw(new Line2D.Double(shiftPoint(center, 11, 11), shiftPoint(center, -11, -11)));
             canvas.draw(new Line2D.Double(shiftPoint(center, -11, 11), shiftPoint(center, 11, -11)));
-            Point2D.Double corner = shiftPoint(center, 3, 3);
+           // Point2D.Double corner = shiftPoint(center, 3, 3);
 
         }
     }
     public void paintComponent(Graphics g){
         /* Шаг 1 -Вызвать метод предка для заливки области цветом заднего фона*
         Эта функциональность -единственное, что осталось в наследство от *
-        paintComponentкласса JPanel*/
+        paintComponent класса JPanel*/
         super.paintComponent(g);
         // Шаг 2 -Если данные графика не загружены (при показе компонента при
         // запуске программы) -ничего не делать
@@ -279,7 +288,8 @@ public class GraphicsDisplay extends JPanel {
             2) Вычтем из этогозначения сколько делений требовалось изначально;
             3) Набросим по половине недостающего расстояния на maxYи minY*/
             double yIncrement = (getSize().getHeight()/scale-(maxY-minY))/2;
-            maxY+= yIncrement;minY-= yIncrement;
+            maxY+= yIncrement;
+            minY-= yIncrement;
         }
         if(scale==scaleY) {
             // Если за основу был взят масштаб по оси Y, действовать по аналогии
